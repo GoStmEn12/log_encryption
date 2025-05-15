@@ -3,14 +3,14 @@
 
 LCG::LCG() : a(0), c(0), m(0), x0(0), current_x(0), is_initialized(false) {}
 
-bool LCG::set_parameters(unsigned long long a_, unsigned long long c_, unsigned long long m_, unsigned long long x0_) {
-    if (m_ <= 0 || a_ >= m_ || c_ >= m_ || x0_ >= m_) {
+bool LCG::set_parameters(unsigned long long a, unsigned long long c, unsigned long long m, unsigned long long x0) {
+    if (m <= 0 || a >= m || c >= m || x0 >= m) {
         return false;
     }
-    a = a_;
-    c = c_;
-    m = m_;
-    x0 = x0_;
+    this->a = a;
+    this->c = c;
+    this->m = m;
+    this->x0 = x0;
     current_x = x0;
     is_initialized = true;
     return true;

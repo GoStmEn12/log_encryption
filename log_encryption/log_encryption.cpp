@@ -7,6 +7,7 @@
 #include "lcg.h"
 #include "file_manager.h"
 #include "utils.h"
+#include "console_ui.h"
 using namespace std;
 
 int main()
@@ -15,179 +16,106 @@ int main()
     SetConsoleOutputCP(1251);
     LCG lcg;
     FileManager fileManager;
+    ConsoleUI ui;
     unsigned long long a, c, m, x0;
     char choice = ' ';
     do {
-        cout << "\tМеню\n";
-        cout << "1- Налаштувати параметри генератора\n";
-        cout << "2- Згенерувати та зберегти послідовність чисел\n";
-        cout << "3- Зашифрувати текстове повідомлення\n";
-        cout << "4- Зашифрувати файл\n";
-        cout << "5- Розшифрувати файл\n";
-        cout << "6- Вихід\n";
-        cout << "Зробіть вибір: ";
-        cin >> choice;
+        ui.show_menu();
+        choice = ui.get_choice();
         switch (choice)
         {
         case '1': {
-            string input_a, input_c, input_m, input_x0;
-            bool valid = false;
-
-            do {
-                cout << "Введіть a (множник): ";
-                cin.ignore();
-                getline(cin, input_a);
-                if (!isValidNumber(input_a, a)) {
-                    cout << "Недійсне введення для a! Введіть коректне ціле число.\n";
-                    continue;
-                }
-
-                cout << "Введіть c (доданок): ";
-                getline(cin, input_c);
-                if (!isValidNumber(input_c, c)) {
-                    cout << "Недійсне введення для c! Введіть коректне ціле число.\n";
-                    continue;
-                }
-
-                cout << "Введіть m (модуль, m > 0): ";
-                getline(cin, input_m);
-                if (!isValidNumber(input_m, m)) {
-                    cout << "Недійсне введення для m! Введіть коректне ціле число.\n";
-                    continue;
-                }
-
-                cout << "Введіть x0 (початкове значення): ";
-                getline(cin, input_x0);
-                if (!isValidNumber(input_x0, x0)) {
-                    cout << "Недійсне введення для x0! Введіть коректне ціле число.\n";
-                    continue;
-                }
-
-                valid = lcg.set_parameters(a, c, m, x0);
-                if (!valid) {
-                    cout << "Недійсні параметри! Переконайтеся, що m > 0 і a, c, x0 є в діапазоні [0, m-1].\n";
-                }
-            } while (!valid);
-
-            cout << "Параметри успішно встановлено.\n";
+            ui.get_parameters(a, c, m, x0);
+            if (lcg.set_parameters(a, c, m, x0)) {
+                ui.show_message("Параметри успішно встановлено.");
+            }
+            else {
+                ui.show_message("Недійсні параметри! Переконайтеся, що m > 0 і a, c, x0 є в діапазоні [0, m-1].");
+            }
             break;
         }
         case '2': {
-            string filename;
-            int count;
-            cout << "Введіть ім'я файлу для збереження послідовності: ";
-            cin.ignore();
-            getline(cin, filename);
+            string filename = ui.get_filename("Введіть ім'я файлу для збереження послідовності: ");
             if (!isValidFilename(filename)) {
-                cout << "Недійсне ім'я файлу! Використовуйте лише латинські літери, цифри, _, -, та крапку для розширення.\n";
-                continue;
+                ui.show_message("Недійсне ім'я файлу! Використовуйте лише латинські літери, цифри, _, -, та крапку для розширення.");
+                break;
             }
-            cout << "Введіть кількість значень для генерації: ";
-            cin >> count;
+            int count = ui.get_sequence_count();
 
             if (fileManager.save_sequence(filename, lcg, count)) {
-                cout << "Послідовність збережено у " << filename << "\n";
-            }
-            else {
-                cout << "Не вдалося зберегти послідовність.\n";
+                ui.show_message("Послідовність збережено у " + filename);
             }
             break;
         }
         case '3': {
             if (!lcg.is_ready()) {
-                cout << "Генератор не ініціалізований. Спочатку налаштуйте параметри.\n";
+                ui.show_message("Генератор не ініціалізований. Спочатку налаштуйте параметри.");
                 break;
             }
-            string message;
-            cin.ignore();
-            cout << "Введіть текст для шифрування: ";
-            getline(cin, message);
+            string message = ui.get_text_to_encrypt();
 
             vector<char> data(message.begin(), message.end());
             vector<char> encrypted = lcg.encrypt_decrypt(data, message.length());
-            cout << "Зашифрований текст: ";
-            for (char ch : encrypted) cout << ch;
-            cout << "\n";
-
             vector<char> decrypted = lcg.encrypt_decrypt(encrypted, message.length());
-            cout << "Розшифрований текст: ";
-            for (char ch : decrypted) cout << ch;
-            cout << "\n";
+            ui.show_encrypted_decrypted_text(encrypted, decrypted);
             break;
         }
         case '4': {
             if (!lcg.is_ready()) {
-                cout << "Генератор не ініціалізований. Спочатку налаштуйте параметри.\n";
+                ui.show_message("Генератор не ініціалізований. Спочатку налаштуйте параметри.");
                 break;
             }
-            string filename;
-            cout << "Введіть ім'я файлу для шифрування: ";
-            cin.ignore();
-            getline(cin, filename);
+            string filename = ui.get_filename("Введіть ім'я файлу для шифрування: ");
             if (!isValidFilename(filename)) {
-                cout << "Недійсне ім'я файлу! Використовуйте лише латинські літери, цифри, _, -, та крапку для розширення.\n";
-                continue;
+                ui.show_message("Недійсне ім'я файлу! Використовуйте лише латинські літери, цифри, _, -, та крапку для розширення.");
+                break;
             }
 
             vector<char> data = fileManager.read_file(filename);
             if (data.empty()) {
-                continue;
+                break;
             }
 
             vector<char> result = lcg.encrypt_decrypt(data, data.size());
 
-            if (fileManager.write_file("encrypted_" + filename, result)) {
-                cout << "Файл зашифровано та збережено як encrypted_" + filename << "\n";
-            }
-            else {
-                cout << "Не вдалося зберегти зашифрований файл.\n";
+            string encrypted_filename = "encrypted_" + filename;
+            if (fileManager.write_file(encrypted_filename, result)) {
+                ui.show_message("Файл зашифровано та збережено як " + encrypted_filename);
             }
             break;
         }
         case '5': {
-            string filename;
-            cout << "Введіть ім'я файлу для розшифрування: ";
-            cin.ignore();
-            getline(cin, filename);
+            string filename = ui.get_filename("Введіть ім'я файлу для розшифрування: ");
             if (!isValidFilename(filename)) {
-                cout << "Недійсне ім'я файлу! Використовуйте лише латинські літери, цифри, _, -, та крапку для розширення.\n";
-                continue;
+                ui.show_message("Недійсне ім'я файлу! Використовуйте лише латинські літери, цифри, _, -, та крапку для розширення.");
+                break;
             }
 
             vector<char> data = fileManager.read_file(filename);
             if (data.empty()) {
-                continue;
+                break;
             }
 
-            cout << "Введіть параметри для розшифрування:\n";
-            cout << "Введіть a (множник): ";
-            cin >> a;
-            cout << "Введіть c (доданок): ";
-            cin >> c;
-            cout << "Введіть m (модуль, m > 0): ";
-            cin >> m;
-            cout << "Введіть x0 (початкове значення): ";
-            cin >> x0;
+            ui.show_message("Введіть параметри для розшифрування:");
+            ui.get_parameters(a, c, m, x0);
 
             if (!lcg.set_parameters(a, c, m, x0)) {
-                cout << "Недійсні параметри! Переконайтеся, що m > 0 і a, c, x0 є в діапазоні [0, m-1].\n";
+                ui.show_message("Недійсні параметри! Переконайтеся, що m > 0 і a, c, x0 є в діапазоні [0, m-1].");
                 break;
             }
 
             vector<char> result = lcg.encrypt_decrypt(data, data.size());
 
-            if (fileManager.write_file("decrypted_" + filename, result)) {
-                cout << "Файл розшифровано та збережено як decrypted_" + filename << "\n";
-            }
-            else {
-                cout << "Не вдалося зберегти розшифрований файл.\n";
+            string decrypted_filename = "decrypted_" + filename;
+            if (fileManager.write_file(decrypted_filename, result)) {
+                ui.show_message("Файл розшифровано та збережено як " + decrypted_filename);
             }
             break;
         }
         case '6':
             break;
         default:
-            cout << "\nПомилка у виборі! Оберіть опцію з меню!\n";
+            ui.show_message("\nПомилка у виборі! Оберіть опцію з меню!");
             break;
         }
     } while (choice != '6');
@@ -204,7 +132,7 @@ bool isValidNumber(const string& input, unsigned long long& value) {
         value = stoull(input, &pos);
         return pos == input.length();
     }
-    catch (const exception& e) {
+    catch (const std::exception& e) {
         return false;
     }
 }

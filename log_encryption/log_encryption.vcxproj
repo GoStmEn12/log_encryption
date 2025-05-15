@@ -127,11 +127,13 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="console_ui.cpp" />
     <ClCompile Include="file_manager.cpp" />
     <ClCompile Include="lcg.cpp" />
     <ClCompile Include="log_encryption.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="console_ui.h" />
     <ClInclude Include="file_manager.h" />
     <ClInclude Include="lcg.h" />
     <ClInclude Include="utils.h" />
