@@ -4,15 +4,14 @@
 #include <string>
 #include "file_manager.h"
 
-
 bool FileManager::save_sequence(const string& filename, LCG& lcg, int count) {
     if (!lcg.is_ready()) {
-        cout << "Генератор не ініціалізований. Спочатку налаштуйте параметри.\n";
+        cout << "Generator not initialized. Set parameters first.\n";
         return false;
     }
     ofstream out(filename, ios::binary);
     if (!out) {
-        cout << "Не вдалося відкрити файл для збереження послідовності.\n";
+        cout << "Failed to open file for saving sequence.\n";
         return false;
     }
 
@@ -26,25 +25,35 @@ bool FileManager::save_sequence(const string& filename, LCG& lcg, int count) {
 }
 
 vector<char> FileManager::read_file(const string& filename) {
-    ifstream in(filename, ios::binary);
+    // Відкриваємо файл як текст
+    ifstream in(filename);
     if (!in) {
-        cout << "Не вдалося відкрити файл.\n";
+        cout << "Failed to open file.\n";
         return vector<char>();
     }
 
-    in.seekg(0, ios::end);
-    size_t size = in.tellg();
-    in.seekg(0, ios::beg);
-    vector<char> data(size);
-    in.read(data.data(), size);
+    // Зчитуємо весь текст як рядок
+    string content;
+    string line;
+    while (getline(in, line)) {
+        // Видаляємо \r, якщо є (для сумісності з Windows)
+        if (!line.empty() && line.back() == '\r') {
+            line.pop_back();
+        }
+        content += line;
+    }
     in.close();
+
+    // Конвертуємо у vector<char>
+    vector<char> data(content.begin(), content.end());
     return data;
 }
 
 bool FileManager::write_file(const string& filename, const vector<char>& data) {
+    // Відкриваємо файл у бінарному режимі, щоб уникнути додавання \r\n
     ofstream out(filename, ios::binary);
     if (!out) {
-        cout << "Не вдалося відкрити файл для запису.\n";
+        cout << "Failed to open file for writing.\n";
         return false;
     }
     out.write(data.data(), data.size());

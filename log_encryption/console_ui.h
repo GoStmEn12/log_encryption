@@ -4,6 +4,7 @@
 
 #include <string>
 #include <vector>
+#include "file_manager.h"
 using namespace std;
 class ConsoleUI {
 public:
@@ -15,6 +16,7 @@ public:
     string get_text_to_encrypt();
     void show_encrypted_decrypted_text(const vector<char>& encrypted, const vector<char>& decrypted);
     void show_message(const string& message);
+    
 };
 
 #endif

@@ -16,6 +16,7 @@ public:
     unsigned long long next();
     void reset();
     bool is_ready() const;
+   
     vector<char> encrypt_decrypt(const vector<char>& data, int length);
 };
 

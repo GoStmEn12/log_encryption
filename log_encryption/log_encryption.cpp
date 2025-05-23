@@ -12,8 +12,7 @@ using namespace std;
 
 int main()
 {
-    SetConsoleCP(1251);
-    SetConsoleOutputCP(1251);
+    
     LCG lcg;
     FileManager fileManager;
     ConsoleUI ui;
@@ -25,31 +24,37 @@ int main()
         switch (choice)
         {
         case '1': {
+            system("cls");
+            cout << "======Set Generator Parameters======" << endl;
             ui.get_parameters(a, c, m, x0);
             if (lcg.set_parameters(a, c, m, x0)) {
-                ui.show_message("Параметри успішно встановлено.");
+                ui.show_message("Parameters set successfully.");
             }
             else {
-                ui.show_message("Недійсні параметри! Переконайтеся, що m > 0 і a, c, x0 є в діапазоні [0, m-1].");
+                ui.show_message("Invalid parameters! Ensure that m > 0 and a, c, x0 are in range [0, m-1].");
             }
             break;
         }
         case '2': {
-            string filename = ui.get_filename("Введіть ім'я файлу для збереження послідовності: ");
+            system("cls");
+            cout << "======Generate and Save Sequence======";
+            string filename = ui.get_filename("\nEnter filename to save sequence: ");
             if (!isValidFilename(filename)) {
-                ui.show_message("Недійсне ім'я файлу! Використовуйте лише латинські літери, цифри, _, -, та крапку для розширення.");
+                ui.show_message("Invalid filename! Use only Latin letters, digits, _, -, and a dot for extension.");
                 break;
             }
             int count = ui.get_sequence_count();
 
             if (fileManager.save_sequence(filename, lcg, count)) {
-                ui.show_message("Послідовність збережено у " + filename);
+                ui.show_message("Sequence saved to " + filename);
             }
             break;
         }
         case '3': {
+            system("cls");
+            cout << "======Encrypt Text======" << endl;
             if (!lcg.is_ready()) {
-                ui.show_message("Генератор не ініціалізований. Спочатку налаштуйте параметри.");
+                ui.show_message("Generator not initialized. Set parameters first.");
                 break;
             }
             string message = ui.get_text_to_encrypt();
@@ -61,13 +66,15 @@ int main()
             break;
         }
         case '4': {
+            system("cls");
+            cout << "===============Encrypt File===============" << endl;
             if (!lcg.is_ready()) {
-                ui.show_message("Генератор не ініціалізований. Спочатку налаштуйте параметри.");
+                ui.show_message("Generator not initialized. Set parameters first.");
                 break;
             }
-            string filename = ui.get_filename("Введіть ім'я файлу для шифрування: ");
+            string filename = ui.get_filename("Enter filename to encrypt: ");
             if (!isValidFilename(filename)) {
-                ui.show_message("Недійсне ім'я файлу! Використовуйте лише латинські літери, цифри, _, -, та крапку для розширення.");
+                ui.show_message("Invalid filename! Use only Latin letters, digits, _, -, and a dot for extension.");
                 break;
             }
 
@@ -80,14 +87,16 @@ int main()
 
             string encrypted_filename = "encrypted_" + filename;
             if (fileManager.write_file(encrypted_filename, result)) {
-                ui.show_message("Файл зашифровано та збережено як " + encrypted_filename);
+                ui.show_message("File encrypted and saved as " + encrypted_filename);
             }
             break;
         }
         case '5': {
-            string filename = ui.get_filename("Введіть ім'я файлу для розшифрування: ");
+            system("cls");
+            cout << "==============Decrypt File===============" << endl;
+            string filename = ui.get_filename("Enter filename to decrypt: ");
             if (!isValidFilename(filename)) {
-                ui.show_message("Недійсне ім'я файлу! Використовуйте лише латинські літери, цифри, _, -, та крапку для розширення.");
+                ui.show_message("Invalid filename! Use only Latin letters, digits, _, -, and a dot for extension.");
                 break;
             }
 
@@ -96,11 +105,11 @@ int main()
                 break;
             }
 
-            ui.show_message("Введіть параметри для розшифрування:");
+            ui.show_message("Enter parameters for decryption:");
             ui.get_parameters(a, c, m, x0);
 
             if (!lcg.set_parameters(a, c, m, x0)) {
-                ui.show_message("Недійсні параметри! Переконайтеся, що m > 0 і a, c, x0 є в діапазоні [0, m-1].");
+                ui.show_message("Invalid parameters! Ensure that m > 0 and a, c, x0 are in range [0, m-1].");
                 break;
             }
 
@@ -108,14 +117,19 @@ int main()
 
             string decrypted_filename = "decrypted_" + filename;
             if (fileManager.write_file(decrypted_filename, result)) {
-                ui.show_message("Файл розшифровано та збережено як " + decrypted_filename);
+                ui.show_message("File decrypted and saved as " + decrypted_filename);
+                // Виводимо розшифрований текст у консоль для перевірки
+                ui.show_encrypted_decrypted_text(data, result);
             }
             break;
         }
+
         case '6':
+            cout << "==========================================";
+            cout << "\nExit!!!"<<endl;
             break;
         default:
-            ui.show_message("\nПомилка у виборі! Оберіть опцію з меню!");
+            ui.show_message("\nInvalid choice! Select an option from the menu!");
             break;
         }
     } while (choice != '6');

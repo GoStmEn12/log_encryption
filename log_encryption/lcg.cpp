@@ -30,13 +30,19 @@ bool LCG::is_ready() const {
     return is_initialized;
 }
 
+
+
 vector<char> LCG::encrypt_decrypt(const vector<char>& data, int length) {
-    vector<char> result = data;
-    reset();
+    if (!is_initialized) return {};
+
+    std::vector<char> result = data;
+    reset();  // Скидання стану перед розшифруванням (виправлення)
+
     for (int i = 0; i < length; i++) {
         unsigned long long key = next();
         char key_byte = static_cast<char>(key & 0xFF);
         result[i] = data[i] ^ key_byte;
     }
+
     return result;
 }
